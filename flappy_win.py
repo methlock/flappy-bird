@@ -7,35 +7,47 @@ import os
 import msvcrt
 
 
-
 class Board:
     '''
-    tabulka - dataframe - board
-    menim hodnoty podle indexu radek a sloupec
+    Board is dataframe.
+
+    Example:
+         01234567
+        0.......X
+        1.......X
+        2..@.....
+        3........
+        4.......X
+    @ - bird
+    X - column
+    . - empty
     '''
+
     def __init__(self):
         self.size_x = 15
         self.size_y = 9
-        self.DF = pd.DataFrame([['.' for x in range(0, self.size_x)] for y in range(0, self.size_y)])
+        self.DF = pd.DataFrame([[' ' for x in range(0, self.size_x)] for y in range(0, self.size_y)])
         self.columns = []
 
 
     def draw(self):
         self.insertColumns()
         self.insertBird()
-        print (self.DF)
-        for row in self.DF:
-            print(''.join(self.DF.loc[row]))
-        sys.exit()
+        #print (self.DF)
+        print ('=' * self.size_x)
+        for row in self.DF.values.tolist():
+            print (''.join(row))
+        print ('=' * self.size_x)
         self.clearBoard()
 
 
     def insertBird(self):
+        # collision
         if Bird.pos_y < 0 or Bird.pos_y > self.size_y-1:
-            print('The bird flew off.')
+            print ('The bird flew off.')
             sys.exit()
         elif self.DF[Bird.pos_x][Bird.pos_y] == 'X':
-            print('GAME OVER')
+            print ('GAME OVER')
             sys.exit()
         else:
             self.DF[Bird.pos_x][Bird.pos_y] = '@'
@@ -52,18 +64,19 @@ class Board:
             if col.pos_x < 0:
                 del self.columns[0]
 
+
     def clearBoard(self):
-        self.DF = pd.DataFrame([['.' for x in range(0, self.size_x)] for y in range(0, self.size_y)])
+        self.DF = pd.DataFrame([[' ' for x in range(0, self.size_x)] for y in range(0, self.size_y)])
 
 
 class Bird:
     '''
-    objekt promenou souradnici y,
-    metoda pro kolize, jestli se muze pohnout tam kam se ma pohnout
+    Object with cordinates.
     '''
+
     def __init__(self):
         self.pos_x = 2
-        self.pos_y = 4
+        self.pos_y = 3
 
     def changePosY(self, y):
         self.pos_y -= y
@@ -71,9 +84,9 @@ class Bird:
 
 class Column:
     '''
-    objekt vznika s parametry vyska a velikost diry,
-    vytvari se vzdy v poslednim sloupci
-    ma vlastnosti jake radky ve sloupci okupuje
+    Column object is initialized with random parameters - hight and hole size.
+    It is created in last column in dataframe by default.
+    It has the property of which cells occupy.
     '''
 
     def __init__(self):
@@ -86,26 +99,23 @@ class Column:
         self.pos_x -= 1
 
 
-
-# parameters and init
-tick = 1
-column_step = 5
+# game parameters and init
+tick = 0.75
+column_step = 7
 i = 0
 Board = Board()
 Bird = Bird()
 
-
 while True:
 
     # clearing
-    # if platform.system() =='Windows':
-    #     os.system('cls')
-    # elif platform.system() == 'Linux':
-    #     os.system('clear')
+    if platform.system() =='Windows':
+        os.system('cls')
+    elif platform.system() == 'Linux':
+        os.system('clear')
 
+    # new column checker
     i += 1
-    print ('Iteration:', i)
-
     if i % column_step == 0:
         Board.createColumn()
 
@@ -117,6 +127,8 @@ while True:
     else:
         Bird.changePosY(-1)
 
-
+    # draw
+    print (f'Score: {i}')
     Board.draw()
+    print ('Press any key to fly up and <q> to quit.')
     time.sleep(tick)
